@@ -1,17 +1,21 @@
+---
+title: "02-notas"
+output: html_document
+---
 **************
-  I)
+I)
 Paquete:aggregateBioVar
 
-Author: Jason Ratcliff [aut, cre] , Andrew Thurman [aut], Michael Chimenti [ctb], Alejandro Pezzulo [ctb]
+Author: Jason Ratcliff [aut, cre] , Andrew Thurman [aut], Michael Chimenti [ctb], Alejandro Pezzulo [ctb] 
 
 Descripcion: Analiza los una RNA-seq para single cell.
 
 Aspectos positivos:
-  1. responden con normalidad
+1. responden con normalidad
 2. Se ha usado en algunos papers.
 3. La documentación es explícita y clara.
 **************
-  II)
+II)
 
 Paquete: CellaRepertorium
 
@@ -22,7 +26,7 @@ Descripcion:Clusteriza y analiza reportorios de alta resolucion de celulas inmun
 
 
 ***************
-  III)
+III)
 
 Paquete: BiocIO
 
