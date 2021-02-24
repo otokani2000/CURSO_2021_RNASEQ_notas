@@ -2,36 +2,43 @@
 title: "02-notas"
 output: html_document
 ---
-**************
-I)
-Paquete:aggregateBioVar
+#PAQUETES RECIENTES EN BIOCONDUCTOR
+
+I) Paquete:aggregateBioVar
 
 Author: Jason Ratcliff [aut, cre] , Andrew Thurman [aut], Michael Chimenti [ctb], Alejandro Pezzulo [ctb] 
 
 Descripcion: Analiza los una RNA-seq para single cell.
 
 Aspectos positivos:
-1. responden con normalidad
+1. Responden con normalidad
 2. Se ha usado en algunos papers.
 3. La documentación es explícita y clara.
-**************
-II)
 
-Paquete: CellaRepertorium
+II) Paquete: CellaRepertorium
 
 Author: Andrew McDavid [aut, cre], Yu Gu [aut], Erik VonKaenel [aut], Thomas Lin Pedersen [ctb]
 
 Descripcion:Clusteriza y analiza reportorios de alta resolucion de celulas inmunes indivuales.
 
+Aspectos positivos:
+1. Disponible en todas los sistemas operativos.
+2. No tiene porblemas el software
+3. La documentación es explícita y clara.
 
+Aspecto negativo:
+1.No han salido nuevas versiones desde el 2019
 
-***************
-III)
-
-Paquete: BiocIO
+III) Paquete: BiocIO
 
 Author: Martin Morgan [aut], Michael Lawrence [aut], Daniel Van Twisk [aut], Bioconductor Package Maintainer [cre]
 
-En el sistema windows tiene un warning
-
 Descripcion: Sirve para darle formato a diferentes archivos de datos biológicos. Tanto de entrada(importar) como de salida (exportar)
+Aspectos positivos:
+1. Disponible en todas los sistemas operativos.
+2. Responden rápido cualquier duda.
+
+Aspecto negativo:
+1.En el sistema windows tiene un warning
+
+
