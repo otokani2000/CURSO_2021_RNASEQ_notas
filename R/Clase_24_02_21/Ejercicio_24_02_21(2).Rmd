@@ -37,15 +37,17 @@ colData(rse_gene_SRP009615)[
 ```
 
 ```{r}
-
+iSEE::iSEE(rse_gene_SRP009615)
 ```
 
-```{r}
+#Se cambian algunos paramteros de la "Feature assay plot 1"
 
+En data parameters se selecciona los sig. parametros:
+Y-axis-feature-> Se pone el id de interes, en este cao fue el ENSG00000168314.17
+X-axis-> Column data-> sra_attribute.shRNA_expression
 
-```
-
-
+En visual parameters se selecciona los sig. parametros:
+color by-> column data-> sra_attribute.treatment
 
 
 

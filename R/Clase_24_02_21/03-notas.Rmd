@@ -14,9 +14,10 @@ tablita verde_< col data
 1 renglon por cada muestra
 1 columna por cada variable de la muestra
 
-*******************
+
 genomic ranges objetos para guardar info. de genes
-*****************
+
+
 #Unique levels de los cromosomas
 seqlevels(rse) _> como unique
 
@@ -24,9 +25,8 @@ seqlevels(rse) _> como unique
 ## Tabla comprimida por repetición de cada level (chromosoma)
 seqnames(rowRanges(rse))
 
-
-
-***********************
+------------
+## Comando 1
 rse[1:2, ]
 
 actua sobre rowdata, especificamente sobre los genes. Elimina 198 genes y solo deja 2.
