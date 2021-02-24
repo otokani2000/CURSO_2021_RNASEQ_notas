@@ -1,0 +1,38 @@
+---
+title: "ejercicio_iSEE"
+output: html_document
+---
+## Descarguemos unos datos de spatialLIBD
+sce_layer <- spatialLIBD::fetch_data("sce_layer")
+
+## Revisemos el tamaño de este objeto
+pryr::object_size(sce_layer)
+
+iSEE::iSEE(sce_layer)
+
+
+------------------------
+
+Reduced dimension plot 1
+En visual parameters se selecciona los sig. parametros:
+Color by -> Column data -> layer_guess_reorder_short.
+Size-> 5
+
+
+Complex heatmap 1
+En data parameters se selecciona los sig. parametros:
+Assay choices-> log counts # para normalizar el conteo
+Use costums rows-> se escriben los ids de los genes que queremos. Para encontrar los ids de los genes, podemos ir a la fig. "Ras data table 1" y buscar por nombres para encontrar los id's correspondientes a cada gen.
+Cluster raws-> parametros libres. Para clusterizar los genes.
+
+En visual parameters se selecciona los sig. parametros:
+Color by -> Column data-> layer_guess_reorder_short
+
+----------------------------------
+Conclusiones:
+
+*Podemos observar en el heatmap que el gen MBP es el que se expresa más de los 3 genes(MOBP, MBP y PCP4)
+
+*Los genes MOBP y PCP4 se parecen más entre sí.
+
+*La capa WM(White matter) es donde tanto el gen MOBP, como el MBP se expresan más.

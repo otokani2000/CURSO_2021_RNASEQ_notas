@@ -1,0 +1,46 @@
+---
+title: "03-notas"
+output: html_document
+---
+
+SUMARIZE EXPERIMENT
+tablita azul
+1 renglon por cada gen
+1 columna para info de cada gen
+
+tabliata morada
+
+tablita verde_< col data
+1 renglon por cada muestra
+1 columna por cada variable de la muestra
+
+*******************
+genomic ranges objetos para guardar info. de genes
+*****************
+#Unique levels de los cromosomas
+seqlevels(rse) _> como unique
+
+
+## Tabla comprimida por repetición de cada level (chromosoma)
+seqnames(rowRanges(rse))
+
+
+
+***********************
+rse[1:2, ]
+
+actua sobre rowdata, especificamente sobre los genes. Elimina 198 genes y solo deja 2.
+
+
+## Comando 2
+rse[, c("A", "D", "F")]
+
+Actua sobre la col data.
+
+
+**************
+Metadata-> espacio opcional para agregar info. extra
+
+***************
+
+
