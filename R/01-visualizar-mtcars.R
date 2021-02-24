@@ -3,7 +3,7 @@ library("here")
 library("ggplot2")
 
 ## Hello world
-print("Soy Leo")
+print("Soy Otokani")
 
 ## Crear directorio para las figuras
 dir.create(here::here("figuras"), showWarnings = FALSE)
