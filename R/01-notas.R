@@ -1,33 +1,23 @@
-**************
-  I)
-Paquete:aggregateBioVar
 
-Author: Jason Ratcliff [aut, cre] , Andrew Thurman [aut], Michael Chimenti [ctb], Alejandro Pezzulo [ctb]
+  #Primero creas un proyecto
+  usethis::create_project("~/CURSO_2021_RNASEQ_notas")
 
-Descripcion: Analiza los una RNA-seq para single cell.
+#Dos archivos. Uno de prueba y otra con las notas de clase.
+usethis::use_r("01-notas.R")
+usethis::use_r("01-visualizar-mtcars.R")
 
-Aspectos positivos:
-  1. responden con normalidad
-2. Se ha usado en algunos papers.
-3. La documentación es explícita y clara.
-**************
-  II)
+#Generas un token y lo usas
+usethis::create_github_token()
 
-Paquete: CellaRepertorium
+#Para usar ese token y configurar github...
 
-Author: Andrew McDavid [aut, cre], Yu Gu [aut], Erik VonKaenel [aut], Thomas Lin Pedersen [ctb]
-
-Descripcion:Clusteriza y analiza reportorios de alta resolucion de celulas inmunes indivuales.
+usethis::edit_r_environ()
+usethis::create_project("../otokani2000.github.io")
 
 
+## Configura Git y GitHub
+usethis::use_git()
+usethis::use_github()
 
-***************
-  III)
-
-Paquete: BiocIO
-
-Author: Martin Morgan [aut], Michael Lawrence [aut], Daniel Van Twisk [aut], Bioconductor Package Maintainer [cre]
-
-En el sistema windows tiene un warning
-
-Descripcion: Sirve para darle formato a diferentes archivos de datos biológicos. Tanto de entrada(importar) como de salida (exportar)
+#Se modifica la plantilla con datos personales
+postcards::create_postcard(template = "trestles")
