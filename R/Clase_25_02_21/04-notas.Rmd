@@ -1,0 +1,21 @@
+---
+title: "04-notas"
+output: html_document
+---
+
+Model matrix
+----------------
+El "+" se pone para usar varias variables de "x"  que se relacionan a "y"
+El "*" se pone cuando tus dos variables o más de "x" estan relacionadas entre sí, y  a la vez estas se relacionan con "y".
+
+"y" se pone del lado izq de ~
+"x" se pone del lado der. de ~
+
+Se pueden usar variables categóricas
+
+--------------
+Normalizacion  de datos
+
+Si tienes 2 grupos de datos y quieres hacer la normalizacion de los datos de ambos grupos mediante una suma total de sus datos(i.e genes) para comparar los datos, pueden llegar a haber errores al querer comparar el numero total de genes particulares. El grupo A puede tener 5 genes x y el B también, pero al hacer el cociente entre el numero de genes x tanto en A como en B, no necesariamente te va a dar 1 como respuesta. Esto se debe a que hiciste la normalización de los datos sumando todos los genes, y no analizaste casos particulares(genes particulares).
+
+
