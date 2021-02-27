@@ -1,0 +1,11 @@
+---
+title: "05-notas"
+output: html_document
+---
+¿Por qué es importante el argumento sort.by en topTable()?
+R= Para que los datos, al ser obtenidos, no sean ordeandos de manera alfabetica y se complique posteriormente saber qué cosas son qué cosas.
+
+ *Para crear un arhivo temporal que se borra al reiniciar R.
+ file.path(tempdir(), "rse_speaqeasy.RData")
+ 
+ *funcion "droplevels" para eliminar categorias que se encuentren vacias.
