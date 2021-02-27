@@ -1,0 +1,291 @@
+---
+title: "Proyecto"
+output: html_document
+---
+Autism disorder & Postmortem-> SRP132816 
+n_samples -> 65
+Study Title -> Single-nucleus RNA sequencing of post-mortem brain tissue from Autism Spectrum Disorder patients
+
+
+
+```{r}
+library("recount3")
+
+human_projects <- available_projects()
+
+## 2021-02-25 05:12:42 caching file sra.recount_project.MD.gz.
+
+## 2021-02-25 05:12:43 caching file gtex.recount_project.MD.gz.
+
+## 2021-02-25 05:12:43 caching file tcga.recount_project.MD.gz.
+
+rse_gene_SRP132816 <- create_rse(
+    subset(
+        human_projects,
+        project == "SRP132816" & project_type == "data_sources"
+    )
+)
+```
+
+
+```{r}
+assay(rse_gene_SRP132816, "counts") <- compute_read_counts(rse_gene_SRP132816)
+```
+
+```{r}
+rse_gene_SRP132816$sra.sample_attributes[1:5]
+```
+###Tengo que quitar lo de epilepsy y solo dejar los controles????
+###Creo que no...
+
+```{r}
+rse_gene_SRP132816 <- expand_sra_attributes(rse_gene_SRP132816)
+
+colData(rse_gene_SRP132816)[
+    ,
+    grepl("^sra_attribute", colnames(colData(rse_gene_SRP132816)))
+]
+```
+
+##Se van a arreglar los datos para poder interpretarlos correctamente
+## Pasar de character a numeric o factor
+### para que era factor???
+###Isolate si es numeric'????
+
+
+```{r}
+rse_gene_SRP132816$sra_attribute.age <- as.numeric(rse_gene_SRP132816$sra_attribute.age)
+
+rse_gene_SRP132816$sra_attribute.isolate <- as.numeric(rse_gene_SRP132816$sra_attribute.isolate)
+
+rse_gene_SRP132816$sra_attribute.sex <- factor(rse_gene_SRP132816$sra_attribute.sex)
+
+rse_gene_SRP132816$sra_attribute.disease <- factor(rse_gene_SRP132816$sra_attribute.disease)
+
+## Resumen de las variables de interés
+summary(as.data.frame(colData(rse_gene_SRP132816)[
+    ,
+    grepl("^sra_attribute.[age|disease|isolate|sex]", colnames(colData(rse_gene_SRP132816)))
+]))
+
+
+```
+```{r}
+## Encontraremos diferencias entre muestra de menores(<18) vs mayores de edad(>18)
+rse_gene_SRP132816$menores <- factor(ifelse(rse_gene_SRP132816$sra_attribute.age < 18, "menores", "mayores"))
+table(rse_gene_SRP132816$prenatal)
+```
+
+
+```{r}
+rse_gene_SRP132816$assigned_gene_prop <- rse_gene_SRP132816$recount_qc.gene_fc_count_all.assigned / rse_gene_SRP132816$recount_qc.gene_fc_count_all.total
+
+summary(rse_gene_SRP132816$assigned_gene_prop)
+```
+
+#Plot gene_prop vs age
+```{r}
+with(colData(rse_gene_SRP132816), plot(assigned_gene_prop, sra_attribute.age))
+```
+#Plot gene_prop vs disease
+```{r}
+with(colData(rse_gene_SRP132816), plot(assigned_gene_prop, sra_attribute.disease))
+```
+
+
+```{r}
+## Hm... veamos si hay una diferencia entre los grupos
+with(colData(rse_gene_SRP132816), tapply(assigned_gene_prop, menores, summary))
+```
+
+```{r}
+## Guardemos nuestro objeto entero por si luego cambiamos de opinión
+rse_gene_SRP132816_unfiltered <- rse_gene_SRP132816
+
+## Eliminemos a muestras malas
+hist(rse_gene_SRP132816$assigned_gene_prop)
+```
+
+```{r}
+table(rse_gene_SRP132816$assigned_gene_prop < 0.25)
+```
+
+
+```{r}
+rse_gene_SRP132816 <- rse_gene_SRP132816[, rse_gene_SRP132816$assigned_gene_prop > 0.25]
+
+## Calculemos los niveles medios de expresión de los genes en nuestras
+## muestras.
+## Ojo: en un análisis real probablemente haríamos esto con los RPKMs o CPMs
+## en vez de las cuentas.
+gene_means <- rowMeans(assay(rse_gene_SRP132816, "counts"))
+summary(gene_means)
+```
+
+```{r}
+## Eliminamos genes
+rse_gene_SRP132816 <- rse_gene_SRP132816[gene_means > 0.1, ]
+
+## Dimensiones finales
+dim(rse_gene_SRP132816)
+```
+
+
+```{r}
+## Porcentaje de genes que retuvimos
+round(nrow(rse_gene_SRP132816) / nrow(rse_gene_SRP132816_unfiltered) * 100, 2)
+```
+```{r}
+library("edgeR") # BiocManager::install("edgeR", update = FALSE)
+dge <- DGEList(
+    counts = assay(rse_gene_SRP132816, "counts"),
+    genes = rowData(rse_gene_SRP132816)
+)
+dge <- calcNormFactors(dge)
+```
+
+
+```{r}
+library("ggplot2")
+ggplot(as.data.frame(colData(rse_gene_SRP132816)), aes(y = assigned_gene_prop, x = menores)) +
+    geom_boxplot() +
+    theme_bw(base_size = 20) +
+    ylab("Assigned Gene Prop") +
+    xlab("Age Group")
+```
+
+```{r}
+mod <- model.matrix(~ menores + sra_attribute.disease + sra_attribute.sex + assigned_gene_prop,
+    data = colData(rse_gene_SRP132816)
+)
+colnames(mod)
+```
+#### ejemplo
+```{r}
+library("limma")
+vGene <- voom(dge, mod, plot = TRUE)
+```
+```{r}
+eb_results <- eBayes(lmFit(vGene))
+
+de_results <- topTable(
+    eb_results,
+    coef = 2,
+    number = nrow(rse_gene_SRP132816),
+    sort.by = "none"
+)
+dim(de_results)
+```
+
+```{r}
+head(de_results)
+```
+
+```{r}
+table(de_results$adj.P.Val < 0.05)
+```
+```{r}
+## Visualicemos los resultados estadísticos
+plotMA(eb_results, coef = 2)
+```
+```{r}
+volcanoplot(eb_results, coef = 2, highlight = 3, names = de_results$gene_name)
+```
+
+```{r}
+de_results[de_results$gene_name %in% c("DRGX", "DMKN", "FLCN"), ]
+```
+
+
+```{r}
+## Extraer valores de los genes de interés
+exprs_heatmap <- vGene$E[rank(de_results$adj.P.Val) <= 50, ]
+
+## Creemos una tabla con información de las muestras
+## y con nombres de columnas más amigables
+df <- as.data.frame(colData(rse_gene_SRP132816)[, c("menores", "sra_attribute.disease", "sra_attribute.sex")])
+colnames(df) <- c("AgeGroup", "disease", "Sex")
+
+## Hagamos un heatmap
+library("pheatmap")
+pheatmap(
+    exprs_heatmap,
+    cluster_rows = TRUE,
+    cluster_cols = TRUE,
+    show_rownames = FALSE,
+    show_colnames = FALSE,
+    annotation_col = df
+)
+```
+```{r}
+## Para colores
+library("RColorBrewer")
+
+## Conviertiendo los grupos de edad a colores
+col.group <- df$AgeGroup
+levels(col.group) <- brewer.pal(nlevels(col.group), "Set1")
+```
+
+```{r}
+col.group <- as.character(col.group)
+
+## MDS por grupos de edad
+plotMDS(vGene$E, labels = df$AgeGroup, col = col.group)
+```
+```{r}
+## Conviertiendo los valores de Sex a colores
+col.sex <- df$Sex
+levels(col.sex) <- brewer.pal(nlevels(col.sex), "Dark2")
+```
+
+```{r}
+col.sex <- as.character(col.sex)
+
+## MDS por sexo
+plotMDS(vGene$E, labels = df$Sex, col = col.sex)
+```
+
+####Pheatmap con nombre
+
+-------------------------
+```{r}
+library("pheatmap")
+nombres_rse_gene <-rowRanges(rse_gene_SRP132816)$gene_name
+id_rse_gene <- rowRanges(rse_gene_SRP132816)$gene_id
+
+exprs_heatmap <- vGene$E[rank(de_results$adj.P.Val) <= 50, ]
+posiciones <- match(rownames(exprs_heatmap),id_rse_gene)
+# hacer un subconjunto de los ronames 
+filtered_id_names <-rowRanges(rse_gene_SRP132816)$gene_name[posiciones]
+
+# remplazar los nombres de exprs_heatmap
+head(exprs_heatmap)
+exprs_heatmap
+row.names(exprs_heatmap) <- filtered_id_names
+
+pheatmap(
+    exprs_heatmap,
+    # que agrupe los genes tanto en renglones como en cols que son las muestras
+    cluster_rows = TRUE,
+    cluster_cols = TRUE,
+    show_rownames = TRUE,
+    show_colnames = FALSE,
+    annotation_col = df
+)
+```
+
+```{r}
+# default value of pdf is 4
+pdf("pheatmap_con_nombres.pdf", height=14, useDingbats = FALSE)
+## Y luego podemos cambiar el valor de show_rownames de FALSE a TRUE
+pheatmap(
+    exprs_heatmap,
+    # que agrupe los genes tanto en renglones como en cols que son las muestras
+    cluster_rows = TRUE,
+    cluster_cols = TRUE,
+    show_rownames = TRUE,
+    show_colnames = FALSE,
+    annotation_col = df
+)
+dev.off()
+```

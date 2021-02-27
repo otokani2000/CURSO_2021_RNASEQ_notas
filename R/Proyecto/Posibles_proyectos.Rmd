@@ -1,0 +1,32 @@
+---
+title: "Proyecto"
+output: html_document
+---
+
+
+http://research.libd.org/recount3-docs/docs/index.html#study-explorer
+
+
+1. Epigenetics & Diabetes -> SRP128998
+n_samples -> 12
+Study Title -> Valproic acid attenuates hyperglycemia induced complement and coagulation cascade gene expression.
+
+2. Epigenetcis & neurodevelopment disorders. -> SRP124518
+n_samples -> 11
+Study Title -> UBE3A-mediated regulation of imprinted genes and epigenome-wide marks in human neurons.
+
+3. Tumors, human pediatric brainstem gliomas -> SRP150639
+n_samples -> 49
+Study Title -> H3.3 K27M depletion increases differentiation and extends latency of diffuse intrinsic pontine glioma growth in vivo [RNA-Seq]
+
+4. Epigenetics & Alzheimer -> SRP132992.
+n_samples -> 50
+Study Title -> Epigenetic dysregulation of enhancers in neurons is associated with Alzheimer's disease pathology and cognitive symptoms (RNA-Seq)
+
+5.Autism disorder-> SRP044228
+n_samples -> 34
+Study Title -> Disruption of human-specific synaptogenesis program in autism [RNA-seq]
+
+6.Autism disorder & Postmortem-> SRP132816 
+n_samples -> 65
+Study Title -> Single-nucleus RNA sequencing of post-mortem brain tissue from Autism Spectrum Disorder patients
