@@ -1,0 +1,45 @@
+---
+title: "Analisis_proyecto"
+output: html_document
+---
+En este estudio titulado "Single-nucleus RNA sequencing of post-mortem brain tissue from Autism Spectrum Disorder patients" se hace single-nucleus RNA sequencing (snRNA-seq) de cerebros de pacientes ya fallecidos con el desorden de (ASD)espectro autista y se compara con niños y adultos sanos(grupo control) para identificar cambios moleculares significativos en algunas regiones corticales.
+
+De las 65 muestras que se obtuvieron, 48 corresponden a hombres 17 a mujeres. El rango de edad promedio se situa en los 17 años, donde el/la menor del total tan solo tenía 4 años y el/la mayor tenía 54 años. 31 se tomaron como sujetos control, 31 eran  sujetos con ASD y 3 con epilepsia. Las regiones del cerebro que se analizaron fueron la corteza cingulada anterior(28 sujetos) y la corteza prefrontal(37 sujetos).
+
+La mayoría de los muestras corresponden a menores de edad (<18). Un 63.1% son menores y el resto(36.9%)son mayores.
+
+En la Figura 1.A podemos visualizar que la mayoría de la proporción de los genes se distribuyen entre los sujetos de edad entre 10 y 25 años. Esto sencillamente se debe a que la mayoría de los sujetos control y con enfermedad se encuentran en este rango de edad.
+
+En la Figura 1.B podemos visualizar simplemente la proporción de genes que se distribuyen entre las 3 condiciones respecto a enfermedad: sano(grupo control), con (ASD) y con epilepsia. En la condición control y la de ASD es donde se distribuyen la mayoría de genes.
+
+En la Figura 2, podemos apreciar que el histograma entre el intervalo 0.4-0.6 la frecuencia es casi 0 en  el intervalo 0.4-0.5 y 0 en el intervalo 0.5-0.6. Si lo comparamos con los demás rangos de intervalos, esta frecuencia es muy baja por lo que procederemos a eliminarla.
+
+
+En la Figura 3 volvemos a visualizar una distribucion de los genes acorde a nuestros grupos(mayores y menores) en una grafiac tipo boxplot.
+
+Solo 10 genes de 52217 que tenemos en total resultaron diferencialemente expresados en los 2 grupos de edad.
+
+En la parte inferior de la figura 4.A  podemos observar que existen algunos pocos genes que se distancian más de la media que el promedio. Para conocer los nombres de esos genes procedmeos a hacer un volcanoplot.
+
+Como sabiamos que teniamos 10 genes diferencialmente expresados, tomamos los primeros 5, que son los más lejanos a la media y observamos que tanto se alejan.La Figura 4.B nos muestra los nombres de los 5 genes en donde existe un contraste de expresión significativo entre las 2 grupos(menores y mayores).
+
+```{r}
+## Extraer valores de los genes de interés
+exprs_heatmap <- vGene$E[rank(de_results$adj.P.Val) <= 10, ]
+
+## Creemos una tabla con información de las muestras
+## y con nombres de columnas más amigables
+df <- as.data.frame(colData(rse_gene_SRP132816)[, c("menores", "sra_attribute.disease", "sra_attribute.sex", "sra_attribute.tissue")])
+colnames(df) <- c("AgeGroup", "disease", "Sex", "Tissue")
+
+## Hagamos un heatmap
+library("pheatmap")
+pheatmap(
+    exprs_heatmap,
+    cluster_rows = TRUE,
+    cluster_cols = TRUE,
+    show_rownames = FALSE,
+    show_colnames = FALSE,
+    annotation_col = df
+)
+```

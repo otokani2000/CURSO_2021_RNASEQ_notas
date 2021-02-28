@@ -6,6 +6,17 @@ Autism disorder & Postmortem-> SRP132816
 n_samples -> 65
 Study Title -> Single-nucleus RNA sequencing of post-mortem brain tissue from Autism Spectrum Disorder patients
 
+Revisar...
+
+1. if (interactive()) iSEE::iSEE(rse_gene) -> Graficas
+2. ## Eliminamos genes
+rse_gene_SRP132816 <- rse_gene_SRP132816[gene_means > 0.1, ]    -> SI es necesario eliminar ese 0.1 o no de genes.
+
+3. Pongo el tissue o no??
+mod <- model.matrix(~ menores + sra_attribute.disease + sra_attribute.sex + sra_attribute.tissue + assigned_gene_prop,
+    data = colData(rse_gene_SRP132816)
+)
+4. Para que era coef??
 
 
 ```{r}
@@ -35,8 +46,6 @@ assay(rse_gene_SRP132816, "counts") <- compute_read_counts(rse_gene_SRP132816)
 ```{r}
 rse_gene_SRP132816$sra.sample_attributes[1:5]
 ```
-###Tengo que quitar lo de epilepsy y solo dejar los controles????
-###Creo que no...
 
 ```{r}
 rse_gene_SRP132816 <- expand_sra_attributes(rse_gene_SRP132816)
@@ -47,72 +56,88 @@ colData(rse_gene_SRP132816)[
 ]
 ```
 
-##Se van a arreglar los datos para poder interpretarlos correctamente
+##Se van a arreglar los datos para poder interpretarlos correctamente de forma numerica.
 ## Pasar de character a numeric o factor
-### para que era factor???
-###Isolate si es numeric'????
 
 
 ```{r}
 rse_gene_SRP132816$sra_attribute.age <- as.numeric(rse_gene_SRP132816$sra_attribute.age)
 
-rse_gene_SRP132816$sra_attribute.isolate <- as.numeric(rse_gene_SRP132816$sra_attribute.isolate)
+rse_gene_SRP132816$sra_attribute.disease <- factor(rse_gene_SRP132816$sra_attribute.disease)
 
 rse_gene_SRP132816$sra_attribute.sex <- factor(rse_gene_SRP132816$sra_attribute.sex)
 
-rse_gene_SRP132816$sra_attribute.disease <- factor(rse_gene_SRP132816$sra_attribute.disease)
+rse_gene_SRP132816$sra_attribute.tissue <- factor(rse_gene_SRP132816$sra_attribute.tissue)
 
 ## Resumen de las variables de interés
 summary(as.data.frame(colData(rse_gene_SRP132816)[
     ,
-    grepl("^sra_attribute.[age|disease|isolate|sex]", colnames(colData(rse_gene_SRP132816)))
+    grepl("^sra_attribute.[age|disease|sex|tissue]", colnames(colData(rse_gene_SRP132816)))
 ]))
 
 
 ```
+
+De las 65 muestras que se obtuvieron, 48 corresponden a hombres 17 a mujeres. El rango de edad promedio se situa en los 17 años, donde el/la menor del total tan solo tenía 4 años y el/la mayor tenía 54 años. 31 se tomaron como sujetos control, 31 eran  sujetos con ASD y 3 con epilepsia. Las regiones del cerebro que se analizaron fueron la corteza cingulada anterior(28 sujetos) y la corteza prefrontal(37 sujetos).
+
+
+
 ```{r}
-## Encontraremos diferencias entre muestra de menores(<18) vs mayores de edad(>18)
+## Encontraremos diferencias entre muestras de menores de edad(<18) vs mayores de edad(>18)
 rse_gene_SRP132816$menores <- factor(ifelse(rse_gene_SRP132816$sra_attribute.age < 18, "menores", "mayores"))
-table(rse_gene_SRP132816$prenatal)
+table(rse_gene_SRP132816$menores)
 ```
+La mayoría de los muestras corresponden a menores de edad <18. Un 63.1% son menores y el resto(36.9%)son mayores.
 
+##gene_fc_count_all.total: Total number of fragments, including multi-mappers, input to featureCounts
+##gene_fc_count_all.assigned: Number of fragments, including multi-mappers, assigned by featureCounts to a gene
 
+Con estos se datos se harán figuras para mostrar la proporción de genes que se dan en algunas categorias.
 ```{r}
 rse_gene_SRP132816$assigned_gene_prop <- rse_gene_SRP132816$recount_qc.gene_fc_count_all.assigned / rse_gene_SRP132816$recount_qc.gene_fc_count_all.total
 
 summary(rse_gene_SRP132816$assigned_gene_prop)
 ```
-
+Figura 1.A
 #Plot gene_prop vs age
 ```{r}
 with(colData(rse_gene_SRP132816), plot(assigned_gene_prop, sra_attribute.age))
 ```
+En esta figura podemos visualizar que la mayoría de la proporción de los genes se distribuyen entre los sujetos de edad entre 10 y 25 años. Esto sencillamente se debe a que la mayoría de los sujetos control y con enfermedad se encuentran en este rango de edad. 
+
+```{r}
+## ¿hay alguna diferencia entre los grupos de edad?
+with(colData(rse_gene_SRP132816), tapply(assigned_gene_prop, menores, summary))
+```
+
+
+Figura 1.B
 #Plot gene_prop vs disease
 ```{r}
 with(colData(rse_gene_SRP132816), plot(assigned_gene_prop, sra_attribute.disease))
 ```
+En esta figura podemos visualizar simplemente la proporción de genes que se distribuyen entre las 3 condiciones respecto a enfermedad: sano(grupo control), con (ASD) y con epilepsia. En la condición control y la de ASD es donde se distribuyen la mayoría de genes.
 
-
-```{r}
-## Hm... veamos si hay una diferencia entre los grupos
-with(colData(rse_gene_SRP132816), tapply(assigned_gene_prop, menores, summary))
-```
 
 ```{r}
 ## Guardemos nuestro objeto entero por si luego cambiamos de opinión
 rse_gene_SRP132816_unfiltered <- rse_gene_SRP132816
-
-## Eliminemos a muestras malas
+```
+Figura 2
+```{r}
+## Se usa un histograma para poder visualizar y posteriormente eliminar a muestras malas.
 hist(rse_gene_SRP132816$assigned_gene_prop)
 ```
+En la Figura 2, podemos apreciar que el histograma entre el intervalo 0.4-0.6 la frecuencia es casi 0 en  el intervalo 0.4-0.5 y 0 en el intervalo 0.5-0.6. Si lo comparamos con los demás rangos de intervalos, esta frecuencia es muy baja por lo que procederemos a eliminarla.
+
 
 ```{r}
-table(rse_gene_SRP132816$assigned_gene_prop < 0.25)
+table((rse_gene_SRP132816$assigned_gene_prop < 0.4)|(rse_gene_SRP132816$assigned_gene_prop > 0.6))
 ```
-
+Resulta que solo eliminamos a un paciente.
 
 ```{r}
-rse_gene_SRP132816 <- rse_gene_SRP132816[, rse_gene_SRP132816$assigned_gene_prop > 0.25]
+rse_gene_SRP132816 <- rse_gene_SRP132816[, (rse_gene_SRP132816$assigned_gene_prop < 0.4)|(rse_gene_SRP132816$assigned_gene_prop > 0.6)]
 
 ## Calculemos los niveles medios de expresión de los genes en nuestras
 ## muestras.
@@ -121,13 +146,19 @@ rse_gene_SRP132816 <- rse_gene_SRP132816[, rse_gene_SRP132816$assigned_gene_prop
 gene_means <- rowMeans(assay(rse_gene_SRP132816, "counts"))
 summary(gene_means)
 ```
+```{r}
+dim(rse_gene_SRP132816)
+```
+```{r}
+dim(rse_gene_SRP132816_unfiltered)
+```
 
 ```{r}
 ## Eliminamos genes
 rse_gene_SRP132816 <- rse_gene_SRP132816[gene_means > 0.1, ]
-
-## Dimensiones finales
+##Dimensiones finales
 dim(rse_gene_SRP132816)
+
 ```
 
 
@@ -135,7 +166,11 @@ dim(rse_gene_SRP132816)
 ## Porcentaje de genes que retuvimos
 round(nrow(rse_gene_SRP132816) / nrow(rse_gene_SRP132816_unfiltered) * 100, 2)
 ```
+
+#Normalizamos datos
+
 ```{r}
+library(limma)
 library("edgeR") # BiocManager::install("edgeR", update = FALSE)
 dge <- DGEList(
     counts = assay(rse_gene_SRP132816, "counts"),
@@ -144,7 +179,10 @@ dge <- DGEList(
 dge <- calcNormFactors(dge)
 ```
 
+#Expresiones diferenciales
 
+Figura 3
+Volvemos a visualizar una distribucion de los genes acorde a nuestros grupos(mayores y menores) en una grafiac tipo boxplot.
 ```{r}
 library("ggplot2")
 ggplot(as.data.frame(colData(rse_gene_SRP132816)), aes(y = assigned_gene_prop, x = menores)) +
@@ -153,14 +191,15 @@ ggplot(as.data.frame(colData(rse_gene_SRP132816)), aes(y = assigned_gene_prop, x
     ylab("Assigned Gene Prop") +
     xlab("Age Group")
 ```
+#Modelo estadístico
 
 ```{r}
-mod <- model.matrix(~ menores + sra_attribute.disease + sra_attribute.sex + assigned_gene_prop,
+mod <- model.matrix(~ menores + sra_attribute.disease + sra_attribute.sex + sra_attribute.tissue + assigned_gene_prop,
     data = colData(rse_gene_SRP132816)
 )
 colnames(mod)
 ```
-#### ejemplo
+## Análisis de expresión diferencial 
 ```{r}
 library("limma")
 vGene <- voom(dge, mod, plot = TRUE)
@@ -180,80 +219,55 @@ dim(de_results)
 ```{r}
 head(de_results)
 ```
-
+## Genes diferencialmente expresados entre el grupo menores y grupo mayores con FDR < 5%
 ```{r}
 table(de_results$adj.P.Val < 0.05)
 ```
+Solo 10 genes de 52217 que tenemos en total resultaron diferencialemente expresados en los 2 grupos de edad.
+
+Figura 4.A
 ```{r}
 ## Visualicemos los resultados estadísticos
 plotMA(eb_results, coef = 2)
 ```
+En la parte inferior de la figura 4.A  podemos observar que existen algunos pocos genes que se distancian más de la media que el promedio. Para conocer los nombres de esos genes procedmeos a hacer un volcanoplot.
+
+Figura 4.B
+Como sabiamos que teniamos 10 genes diferencialmente expresados, tomamos los primeros 5, que son los más lejanos a la media y observamos que tanto se alejan.
 ```{r}
-volcanoplot(eb_results, coef = 2, highlight = 3, names = de_results$gene_name)
+
+volcanoplot(eb_results, coef = 2, highlight = 5, names = de_results$gene_name)
 ```
 
+La Figura 4.B nos muestra los nombres de los 5 genes en donde existe un contraste de expresión significativo entre las 2 grupos(menores y mayores).
+
+Obtenemos un poco más de información de esos 5 genes...
+
 ```{r}
-de_results[de_results$gene_name %in% c("DRGX", "DMKN", "FLCN"), ]
+#Para visualizar las 6 opciones que tiene LINC0094
+#if (interactive()) iSEE::iSEE(rse_gene_SRP132816)<- graficas 
+```
+LINC0094 tiene 6 opciones del 0-5 al final del nombre, así que escogemos una.
+
+```{r}
+de_results[de_results$gene_name %in% c("LGR6", "DRGX", "GLP2R", "DMKN","LINC00945"), ]
 ```
 
+Visualización de genes diferencialmente expresados
 
 ```{r}
-## Extraer valores de los genes de interés
-exprs_heatmap <- vGene$E[rank(de_results$adj.P.Val) <= 50, ]
+library("pheatmap")
 
 ## Creemos una tabla con información de las muestras
 ## y con nombres de columnas más amigables
-df <- as.data.frame(colData(rse_gene_SRP132816)[, c("menores", "sra_attribute.disease", "sra_attribute.sex")])
-colnames(df) <- c("AgeGroup", "disease", "Sex")
+df <- as.data.frame(colData(rse_gene_SRP132816)[, c("menores", "sra_attribute.disease", "sra_attribute.sex", "sra_attribute.tissue")])
+colnames(df) <- c("AgeGroup", "disease", "Sex", "Tissue")
 
-## Hagamos un heatmap
-library("pheatmap")
-pheatmap(
-    exprs_heatmap,
-    cluster_rows = TRUE,
-    cluster_cols = TRUE,
-    show_rownames = FALSE,
-    show_colnames = FALSE,
-    annotation_col = df
-)
-```
-```{r}
-## Para colores
-library("RColorBrewer")
 
-## Conviertiendo los grupos de edad a colores
-col.group <- df$AgeGroup
-levels(col.group) <- brewer.pal(nlevels(col.group), "Set1")
-```
-
-```{r}
-col.group <- as.character(col.group)
-
-## MDS por grupos de edad
-plotMDS(vGene$E, labels = df$AgeGroup, col = col.group)
-```
-```{r}
-## Conviertiendo los valores de Sex a colores
-col.sex <- df$Sex
-levels(col.sex) <- brewer.pal(nlevels(col.sex), "Dark2")
-```
-
-```{r}
-col.sex <- as.character(col.sex)
-
-## MDS por sexo
-plotMDS(vGene$E, labels = df$Sex, col = col.sex)
-```
-
-####Pheatmap con nombre
-
--------------------------
-```{r}
-library("pheatmap")
 nombres_rse_gene <-rowRanges(rse_gene_SRP132816)$gene_name
 id_rse_gene <- rowRanges(rse_gene_SRP132816)$gene_id
 
-exprs_heatmap <- vGene$E[rank(de_results$adj.P.Val) <= 50, ]
+exprs_heatmap <- vGene$E[rank(de_results$adj.P.Val) <= 10, ]
 posiciones <- match(rownames(exprs_heatmap),id_rse_gene)
 # hacer un subconjunto de los ronames 
 filtered_id_names <-rowRanges(rse_gene_SRP132816)$gene_name[posiciones]
@@ -288,4 +302,42 @@ pheatmap(
     annotation_col = df
 )
 dev.off()
+```
+
+```{r}
+## Para colores
+library("RColorBrewer")
+
+## Convirtiendo los grupos de edad a colores
+col.group <- df$AgeGroup
+levels(col.group) <- brewer.pal(nlevels(col.group), "Set1")
+
+col.group <- as.character(col.group)
+
+## MDS por grupos de edad
+plotMDS(vGene$E, labels = df$AgeGroup, col = col.group)
+```
+
+
+```{r}
+## Convirtiendo los valores de Sex a colores
+col.sex <- df$Sex
+levels(col.sex) <- brewer.pal(nlevels(col.sex), "Dark2")
+
+col.sex <- as.character(col.sex)
+
+## MDS por sexo
+plotMDS(vGene$E, labels = df$Sex, col = col.sex)
+```
+
+
+```{r}
+## Convirtiendo los valores de Tissue a colores
+col.tissue <- df$Tissue
+levels(col.tissue) <- brewer.pal(nlevels(col.tissue), "Set2")
+
+col.tissue <- as.character(col.tissue)
+
+## MDS por Tissue
+plotMDS(vGene$E, labels = df$Tissue, col = col.tissue)
 ```
