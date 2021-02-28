@@ -15,7 +15,7 @@ En la Figura 1.B podemos visualizar simplemente la proporción de genes que se d
 En la Figura 2, podemos apreciar que el histograma entre el intervalo 0.4-0.6 la frecuencia es casi 0 en  el intervalo 0.4-0.5 y 0 en el intervalo 0.5-0.6. Si lo comparamos con los demás rangos de intervalos, esta frecuencia es muy baja por lo que procederemos a eliminarla.
 
 
-En la Figura 3 volvemos a visualizar una distribucion de los genes acorde a nuestros grupos(mayores y menores) en una grafiac tipo boxplot.
+En la Figura 3 volvemos a visualizar una distribucion de los genes acorde a nuestros grupos(mayores y menores) en una grafica tipo boxplot y también vemos la distribución de genes acorde al tejido al que pertenecen.
 
 Solo 10 genes de 52217 que tenemos en total resultaron diferencialemente expresados en los 2 grupos de edad.
 
@@ -23,23 +23,8 @@ En la parte inferior de la figura 4.A  podemos observar que existen algunos poco
 
 Como sabiamos que teniamos 10 genes diferencialmente expresados, tomamos los primeros 5, que son los más lejanos a la media y observamos que tanto se alejan.La Figura 4.B nos muestra los nombres de los 5 genes en donde existe un contraste de expresión significativo entre las 2 grupos(menores y mayores).
 
-```{r}
-## Extraer valores de los genes de interés
-exprs_heatmap <- vGene$E[rank(de_results$adj.P.Val) <= 10, ]
+La Figura 5 es un heatmap donde se mide los niveles de expresion de nuestros 10 genes en relación a distintas categorias.
+A excepción de los genes "DUXAP8" y "DMKN" los mayores de edad tienen los niveles de expresión  estan cerca de la media, ni muy bajos ni muy altos, en contraste a los menores de edad donde los niveles de expresión están más alejados de la media, tanto positiva como negativamente.
 
-## Creemos una tabla con información de las muestras
-## y con nombres de columnas más amigables
-df <- as.data.frame(colData(rse_gene_SRP132816)[, c("menores", "sra_attribute.disease", "sra_attribute.sex", "sra_attribute.tissue")])
-colnames(df) <- c("AgeGroup", "disease", "Sex", "Tissue")
+Lamentablemente en la figura 6 en todos sus apartados(edad, sexo y tejido) no se pueden discernir con eficacia grupos separados.
 
-## Hagamos un heatmap
-library("pheatmap")
-pheatmap(
-    exprs_heatmap,
-    cluster_rows = TRUE,
-    cluster_cols = TRUE,
-    show_rownames = FALSE,
-    show_colnames = FALSE,
-    annotation_col = df
-)
-```

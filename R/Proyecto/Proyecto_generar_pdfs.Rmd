@@ -89,7 +89,10 @@ summary(rse_gene_SRP132816$assigned_gene_prop)
 Figura 1.A
 #Plot gene_prop vs age
 ```{r}
+pdf("Figura1.A.pdf", height=4, useDingbats = FALSE)
 with(colData(rse_gene_SRP132816), plot(assigned_gene_prop, sra_attribute.age))
+
+dev.off()
 ```
 En esta figura podemos visualizar que la mayoría de la proporción de los genes se distribuyen entre los sujetos de edad entre 10 y 25 años. Esto sencillamente se debe a que la mayoría de los sujetos control y con enfermedad se encuentran en este rango de edad. 
 
@@ -102,7 +105,10 @@ with(colData(rse_gene_SRP132816), tapply(assigned_gene_prop, menores, summary))
 Figura 1.B
 #Plot gene_prop vs disease
 ```{r}
+pdf("Figura1.B.pdf", height=4, useDingbats = FALSE)
 with(colData(rse_gene_SRP132816), plot(assigned_gene_prop, sra_attribute.disease))
+
+dev.off()
 ```
 En esta figura podemos visualizar simplemente la proporción de genes que se distribuyen entre las 3 condiciones respecto a enfermedad: sano(grupo control), con (ASD) y con epilepsia. En la condición control y la de ASD es donde se distribuyen la mayoría de genes.
 
@@ -113,8 +119,12 @@ rse_gene_SRP132816_unfiltered <- rse_gene_SRP132816
 ```
 Figura 2
 ```{r}
+pdf("Figura2.pdf", height=4, useDingbats = FALSE)
+
 ## Se usa un histograma para poder visualizar y posteriormente eliminar a muestras malas.
 hist(rse_gene_SRP132816$assigned_gene_prop)
+
+dev.off()
 ```
 En la Figura 2, podemos apreciar que el histograma entre el intervalo 0.4-0.6 la frecuencia es casi 0 en  el intervalo 0.4-0.5 y 0 en el intervalo 0.5-0.6. Si lo comparamos con los demás rangos de intervalos, esta frecuencia es muy baja por lo que procederemos a eliminarla.
 
@@ -170,21 +180,25 @@ dge <- calcNormFactors(dge)
 #Expresiones diferenciales
 
 Figura 3
-Volvemos a visualizar una distribucion de los genes acorde a nuestros grupos(mayores y menores) en una grafica tipo boxplot y también vemos la distribución de genes acorde al tejido al que pertenecen.
+Volvemos a visualizar una distribucion de los genes acorde a nuestros grupos(mayores y menores) en una grafiac tipo boxplot y también vemos la distribución de genes acorde al tejido al que pertenecen.
 ```{r}
 library("ggplot2")
+
+pdf("Figura3.pdf", height=4, useDingbats = FALSE)
+    
 ggplot(as.data.frame(colData(rse_gene_SRP132816)), aes(y = assigned_gene_prop, x = menores)) +
     geom_boxplot() +
     theme_bw(base_size = 20) +
     ylab("Assigned Gene Prop") +
     xlab("Age Group")
-```
-```{r}
+
 ggplot(as.data.frame(colData(rse_gene_SRP132816)), aes(y = assigned_gene_prop, x = rse_gene_SRP132816$sra_attribute.tissue, fill = rse_gene_SRP132816$sra_attribute.disease)) +
-    geom_boxplot()  
-    #ylab("Assigned Gene Prop") + xlab("Tissue")
+    geom_boxplot()  +
+    ylab("Assigned Gene Prop") + xlab("Tissue")
     
+dev.off()
 ```
+
 #Modelo estadístico
 
 ```{r}
@@ -221,16 +235,22 @@ Solo 10 genes de 52217 que tenemos en total resultaron diferencialemente expresa
 
 Figura 4.A
 ```{r}
+pdf("Figura4.A.pdf", height=4, useDingbats = FALSE)
+
 ## Visualicemos los resultados estadísticos
 plotMA(eb_results, coef = 2)
+
+dev.off()
 ```
 En la parte inferior de la figura 4.A  podemos observar que existen algunos pocos genes que se distancian más de la media que el promedio. Para conocer los nombres de esos genes procedmeos a hacer un volcanoplot.
 
 Figura 4.B
 Como sabiamos que teniamos 10 genes diferencialmente expresados, tomamos los primeros 5, que son los más lejanos a la media y observamos que tanto se alejan.
 ```{r}
-
+pdf("Figura4.B.pdf", height=4, useDingbats = FALSE)
 volcanoplot(eb_results, coef = 2, highlight = 5, names = de_results$gene_name)
+
+dev.off()
 ```
 
 La Figura 4.B nos muestra los nombres de los 5 genes en donde existe un contraste de expresión significativo entre las 2 grupos(menores y mayores).
@@ -286,7 +306,7 @@ La Figura 5 es un heatmap donde se mide los niveles de expresion de nuestros 10 
 A excepción de los genes "DUXAP8" y "DMKN" los mayores de edad tienen los niveles de expresión  estan cerca de la media, ni muy bajos ni muy altos, en contraste a los menores de edad donde los niveles de expresión están más alejados de la media, tanto positiva como negativamente.
 
 
-
+Figura 5
 ```{r}
 # default value of pdf is 4
 pdf("Figura5.pdf", height=14, useDingbats = FALSE)
@@ -302,11 +322,15 @@ pheatmap(
 )
 dev.off()
 ```
-Figura 6
 
+Figura 6
 ```{r}
 ## Para colores
 library("RColorBrewer")
+
+
+pdf("Figura6.pdf", height=4, useDingbats = FALSE)
+
 
 ## Convirtiendo los grupos de edad a colores
 col.group <- df$AgeGroup
@@ -337,7 +361,6 @@ col.tissue <- as.character(col.tissue)
 ## MDS por sexo
 plotMDS(vGene$E, labels = df$Tissue, col = col.tissue)
 
+
+dev.off()
 ```
-
-Lamentablemente en la figura 6 en todos sus apartados(edad, sexo y tejido) no se pueden discernir con eficacia grupos separados.
-
